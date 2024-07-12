@@ -10,6 +10,7 @@ services:
       - .:/app
     depends_on:
       - mongo
+      - socket_server
   
   mongo:
     image: mongo:latest
@@ -17,7 +18,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - ./data/mongo_data:/data/db
+      - mongo_data:/data/db
 
   socket_server:
     build:
@@ -28,3 +29,6 @@ services:
       - "5000:5000"
     depends_on:
       - mongo
+
+volumes:
+  mongo_data:

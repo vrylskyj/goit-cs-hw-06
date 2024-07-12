@@ -1,5 +1,6 @@
+# main.py
+
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import socketserver
 import socket
 import json
 from datetime import datetime
@@ -20,7 +21,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.path = '/error.html'
         elif not self.path.startswith('/static/'):
             self.send_error(404, 'File Not Found: %s' % self.path)
-            return
+            self.path = '/error.html'
 
         try:
             if self.path.startswith('/static/'):
@@ -43,6 +44,13 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.wfile.write(content.encode())
         except FileNotFoundError:
             self.send_error(404, 'File Not Found: %s' % self.path)
+            self.path = '/error.html'
+            with open('.' + self.path, 'r') as file:
+                content = file.read()
+            self.send_response(404)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            self.wfile.write(content.encode())
 
     def do_POST(self):
         if self.path == '/message':
@@ -53,7 +61,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
             # Відправка даних на Socket-сервер
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.connect(('localhost', 5000))
+                s.connect(('socket_server', 5000))
                 s.sendall(json.dumps(data).encode())
 
             self.send_response(302)
@@ -61,7 +69,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
 def run_http_server():
-    with socketserver.TCPServer(("", 3000), RequestHandler) as httpd:
+    with HTTPServer(("", 3000), RequestHandler) as httpd:
         print("HTTP server running on port 3000")
         httpd.serve_forever()
 

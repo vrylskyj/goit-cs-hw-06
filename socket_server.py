@@ -1,3 +1,5 @@
+# socket_server.py
+
 import socket
 import json
 import pymongo
@@ -9,7 +11,7 @@ collection = db['messages']
 
 def start_socket_server():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(('localhost', 5000))
+        s.bind(('0.0.0.0', 5000))
         s.listen()
         print("Socket server running on port 5000")
 
